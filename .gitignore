@@ -12,7 +12,8 @@
 *.out
 qslcard
 *.pdf
-!example.pdf
+!example-logs-qslcards.pdf
 
 *.json
-!example.json
+!example-logs.json
+!example-config.json

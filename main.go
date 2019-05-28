@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"path/filepath"
 
 	"github.com/signintech/gopdf"
 )
@@ -88,8 +89,12 @@ func main() {
 		}
 
 		// output
-		pdf.WritePdf("qslcards.pdf")
+		pdf.WritePdf(getFileNameWihoutExt(logFile) + "-qslcards.pdf")
 	}
+}
+
+func getFileNameWihoutExt(path string) string {
+	return filepath.Base(path[:len(path)-len(filepath.Ext(path))])
 }
 
 // draw box

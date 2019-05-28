@@ -1,0 +1,21 @@
+{
+  "CardSize": {
+    "H": 283.5,
+    "W": 419.5
+  },
+  "StationData": {
+     "Call": "JJ1HGP",
+     "QRA": "Your Name",
+     "Rig": "AA000"
+  },
+  "UrCallSign": {
+    "Size": 42,
+    "Name": "migu-1m",
+    "Location": "../../../../../.fonts/migu-1m-regular.ttf"
+  },
+  "Body": {
+    "Size": 12,
+    "Name": "migu-1m",
+    "Location": "../../../../../.fonts/migu-1m-regular.ttf"
+  }
+}

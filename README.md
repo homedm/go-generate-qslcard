@@ -5,11 +5,11 @@ generate QSL Card from JSON fomat log.
 予定
 
 ```sh
-qslcard logs.json --config setting.json
+qslcard -config example-config.json example-logs.json
 ```
 
 # Example
-[QSL Card](example.pdf "Example")
+[QSL Card](example-logs-qslcards.pdf "Example")
 
 ## exapmle-logs.json
 ``` exapmle-logs.json
