@@ -1,6 +1,8 @@
 # go-generate-qslcard
 generate QSL Card from JSON fomat log.
 
+In amateur radio, QSL cards are exchanged as proof of communication. This command created a CLI command to generate QSL Card from JSON format log.
+
 # Usage
 予定
 
