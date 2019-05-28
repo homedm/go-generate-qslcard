@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -47,34 +48,48 @@ type QSLCard struct {
 }
 
 func main() {
-	qsos, err := readLogs("qsos.json")
+	configFile := flag.String("config", "default.json", "indicate config file path")
+	help := flag.Bool("help", false, "indicate config file path")
+	flag.Parse()
+	args := flag.Args()
+
+	if len(args) == 0 || *help {
+		fmt.Println("qslcard -help")
+		fmt.Println("example: qslcard -config config.json qso-log.json")
+		return
+	}
+
+	// read config file
+	setting, err := readConfig(*configFile)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	setting, err := readConfig("qslcard.json")
-	if err != nil {
-		log.Fatal(err)
+	for _, logFile := range args {
+		qsos, err := readLogs(logFile)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// init pdf
+		pdf := gopdf.GoPdf{}
+		// 10.0 cm x 14.8 cm = 283.5 pt x 419.5 pt
+		config := gopdf.Config{PageSize: gopdf.Rect{H: setting.CardSize.H, W: setting.CardSize.W}}
+
+		pdf.Start(config)
+
+		// print debug data
+		for _, qso := range qsos {
+			fmt.Printf("%d: Date=%s %s, HisCall=%s, Mode=%s\n", qso.ID, qso.Date, qso.Time, qso.HisCall, qso.Mode)
+
+			drawNewPage(&pdf, setting)
+			writeUrStationData(&pdf, setting)
+			writeQSOData(&pdf, setting, qso)
+		}
+
+		// output
+		pdf.WritePdf("qslcards.pdf")
 	}
-
-	// init pdf
-	pdf := gopdf.GoPdf{}
-	// 10.0 cm x 14.8 cm = 283.5 pt x 419.5 pt
-	config := gopdf.Config{PageSize: gopdf.Rect{H: setting.CardSize.H, W: setting.CardSize.W}}
-
-	pdf.Start(config)
-
-	// print debug data
-	for _, qso := range qsos {
-		fmt.Printf("%d: Date=%s %s, HisCall=%s, Mode=%s\n", qso.ID, qso.Date, qso.Time, qso.HisCall, qso.Mode)
-
-		drawNewPage(&pdf, setting)
-		writeUrStationData(&pdf, setting)
-		writeQSOData(&pdf, setting, qso)
-	}
-
-	// output
-	pdf.WritePdf("qslcards.pdf")
 }
 
 // draw box
