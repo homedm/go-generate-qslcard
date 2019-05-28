@@ -11,11 +11,17 @@ import (
 
 // QSOsData is QSO logs data
 type QSOsData struct {
-	ID      int    `json:"id"`
-	Date    string `json:"date"`
+	ID   int `json:"id"`
+	Date struct {
+		Year  string `json:"year"`
+		Month string `json:"month"`
+		Day   string `json:"day"`
+	} `json:"date"`
 	Time    string `json:"time"`
-	HisCall string `json:"his_callsign"`
+	HisCall string `json:"his_call"`
 	Mode    string `json:"mode"`
+	RST     string `json:"rst"`
+	Band    string `json:"band"`
 }
 
 // QSLCard config
@@ -63,7 +69,8 @@ func main() {
 		fmt.Printf("%d: Date=%s %s, HisCall=%s, Mode=%s\n", qso.ID, qso.Date, qso.Time, qso.HisCall, qso.Mode)
 
 		drawNewPage(&pdf, setting)
-		writeHisCallsign(&pdf, setting, qso.HisCall)
+		writeUrStationData(&pdf, setting)
+		writeQSOData(&pdf, setting, qso)
 	}
 
 	// output
@@ -167,7 +174,7 @@ func drawNewPage(pdf *gopdf.GoPdf, setting QSLCard) {
 	pdf.Text("Remarks")
 }
 
-func writeHisCallsign(pdf *gopdf.GoPdf, setting QSLCard, call string) {
+func writeUrStationData(pdf *gopdf.GoPdf, setting QSLCard) {
 	// set font
 	fontName := setting.UrCallSign.Name
 	fontLocation := setting.UrCallSign.Location
@@ -184,7 +191,7 @@ func writeHisCallsign(pdf *gopdf.GoPdf, setting QSLCard, call string) {
 	}
 
 	// calc your call sign position
-	l, err := pdf.MeasureTextWidth(call)
+	l, err := pdf.MeasureTextWidth(setting.StationData.Call)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -192,8 +199,9 @@ func writeHisCallsign(pdf *gopdf.GoPdf, setting QSLCard, call string) {
 	x := setting.CardSize.W/2 - l/2
 	y := setting.CardSize.H / 4
 
+	// write your callsign
 	setLoc(pdf, x, y)
-	pdf.Text(string(call))
+	pdf.Text(string(setting.StationData.Call))
 }
 
 func readLogs(file string) ([]QSOsData, error) {
@@ -225,4 +233,78 @@ func readConfig(file string) (QSLCard, error) {
 func setLoc(pdf *gopdf.GoPdf, x float64, y float64) {
 	pdf.SetX(x)
 	pdf.SetY(y)
+}
+
+func writeQSOData(pdf *gopdf.GoPdf, setting QSLCard, qso QSOsData) {
+	// set font
+	fontName := setting.Body.Name
+	fontLocation := setting.Body.Location
+	fontSize := setting.Body.Size
+
+	err := pdf.AddTTFFont(fontName, fontLocation)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = pdf.SetFont(fontName, "", fontSize)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	year := qso.Date.Year
+	day := qso.Date.Day
+	month := qso.Date.Month
+	time := qso.Time
+	call := qso.HisCall
+	mode := qso.Mode
+	rst := qso.RST
+	band := qso.Band
+
+	// write qso date
+	x := 40.0
+	y := 180.0
+	setLoc(pdf, x, y)
+	pdf.Text(day)
+
+	x += float64(fontSize * 4)
+	setLoc(pdf, x, y)
+	pdf.Text(month)
+
+	x += float64(fontSize * 4)
+	setLoc(pdf, x, y)
+	pdf.Text(year)
+
+	// write qso time
+	x += float64(fontSize * 4)
+	setLoc(pdf, x, y)
+	pdf.Text(time)
+
+	// write qso's RST report
+	x += float64(fontSize * 5)
+	setLoc(pdf, x, y)
+	pdf.Text(rst)
+
+	// write qso Mode
+	x += float64(fontSize * 4)
+	setLoc(pdf, x, y)
+	pdf.Text(mode)
+
+	// write qso band
+	x += float64(fontSize * 5)
+	setLoc(pdf, x, y)
+	pdf.Text(band)
+
+	// write his callsign
+	var w float64
+	if w, err = pdf.MeasureTextWidth("To "); err != nil {
+		log.Fatal(err)
+	}
+	w1, err := pdf.MeasureTextWidth("00    01    2019    00:00    599    144    SSB")
+	if err != nil {
+		log.Fatal(err)
+	}
+	w1 *= 1.3
+	y = 150.0
+	setLoc(pdf, (setting.CardSize.W-w1)/2+w, y-float64(fontSize))
+	pdf.Text(call)
 }
