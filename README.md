@@ -1,0 +1,69 @@
+# go-generate-qslcard
+generate QSL Card from JSON fomat log.
+
+# Usage
+予定
+
+```sh
+qslcard logs.json --config setting.json
+```
+
+# Example
+[QSL Card](example.pdf "Example")
+
+## exapmle-logs.json
+``` exapmle-logs.json
+[
+  {
+    "id": 1,
+    "date": {
+      "year": "2018",
+      "month": "12",
+      "day": "07"
+    },
+    "time": "12:22",
+    "his_call": "JJ1HGP",
+    "mode": "SSB",
+    "rst": "59",
+    "band": "50"
+	},
+  {
+    "id": 2,
+    "date": {
+      "year": "2018",
+      "month": "12",
+      "day": "07"
+      },
+      "time": "12:25",
+      "his_call": "JA1BCD",
+      "mode": "SSB",
+      "rst": "59",
+      "band": "21"
+   }
+]
+```
+
+## example-config.json
+``` example-config.json
+{
+  "CardSize": {
+    "H": 283.5,
+    "W": 419.5
+  },
+  "StationData": {
+     "Call": "JJ1HGP",
+     "QRA": "Your Name",
+     "Rig": "AA000"
+  },
+  "UrCallSign": {
+    "Size": 42,
+    "Name": "migu-1m",
+    "Location": "./fonts/migu-1m-regular.ttf"
+  },
+  "Body": {
+    "Size": 12,
+    "Name": "migu-1m",
+    "Location": "./fonts/migu-1m-regular.ttf"
+  }
+}
+```
