@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"path/filepath"
+	"strconv"
 
 	"github.com/signintech/gopdf"
 )
@@ -48,15 +49,18 @@ type QSLCard struct {
 	} `json:"Body"`
 }
 
+var debug *bool
+
 func main() {
 	configFile := flag.String("config", "default.json", "indicate config file path")
-	help := flag.Bool("help", false, "indicate config file path")
+	debug = flag.Bool("debug", false, "debug option, bool type")
+	helpf := flag.Bool("help", false, "indicate config file path")
 	flag.Parse()
 	args := flag.Args()
 
-	if len(args) == 0 || *help {
-		fmt.Println("qslcard -help")
-		fmt.Println("example: qslcard -config config.json qso-log.json")
+	// Display help
+	if len(args) == 0 || *helpf {
+		Help()
 		return
 	}
 
@@ -66,7 +70,9 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// loop log files
 	for _, logFile := range args {
+		debugLog("Read file=" + logFile)
 		qsos, err := readLogs(logFile)
 		if err != nil {
 			log.Fatal(err)
@@ -75,13 +81,11 @@ func main() {
 		// init pdf
 		pdf := gopdf.GoPdf{}
 		// 10.0 cm x 14.8 cm = 283.5 pt x 419.5 pt
-		config := gopdf.Config{PageSize: gopdf.Rect{H: setting.CardSize.H, W: setting.CardSize.W}}
-
-		pdf.Start(config)
+		pdf.Start(gopdf.Config{PageSize: gopdf.Rect{H: setting.CardSize.H, W: setting.CardSize.W}})
 
 		// print debug data
 		for _, qso := range qsos {
-			fmt.Printf("%d: Date=%s %s, HisCall=%s, Mode=%s\n", qso.ID, qso.Date, qso.Time, qso.HisCall, qso.Mode)
+			debugLog("ID=" + strconv.Itoa(qso.ID) + ", Date=" + qso.Date.Year + "/" + qso.Date.Month + "/" + qso.Date.Day + ", Time=" + qso.Time + ", HisCall=" + qso.HisCall + ", Mode=" + qso.Mode)
 
 			drawNewPage(&pdf, setting)
 			writeUrStationData(&pdf, setting)
@@ -327,4 +331,16 @@ func writeQSOData(pdf *gopdf.GoPdf, setting QSLCard, qso QSOsData) {
 	y = 150.0
 	setLoc(pdf, (setting.CardSize.W-w1)/2+w, y-float64(fontSize))
 	pdf.Text(call)
+}
+
+// Help is write help document
+func Help() {
+	fmt.Println("qslcard -help")
+	fmt.Println("example:\n qslcard -config config.json qso-log.json ...")
+}
+
+func debugLog(msg string) {
+	if *debug {
+		fmt.Println("Debug Msg: " + msg)
+	}
 }
